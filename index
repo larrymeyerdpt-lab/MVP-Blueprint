@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clinic Operating System — MVP Development Blueprint</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--ink:#0A0E17;--ink-soft:#131927;--ink-card:#171D2E;--ink-elevated:#1C2438;
+--border-dark:#252D42;--border-subtle:#1E2640;
+--text-primary:#F1F3F8;--text-secondary:#8A93A8;--text-muted:#5A6478;
+--accent:#E8A83E;--accent-glow:rgba(232,168,62,.1);--accent-hover:#F0B94E;
+--green:#34D399;--green-bg:rgba(52,211,153,.08);--green-border:rgba(52,211,153,.2);
+--blue:#60A5FA;--blue-bg:rgba(96,165,250,.08);--blue-border:rgba(96,165,250,.2);
+--red:#F87171;--red-bg:rgba(248,113,113,.08);--red-border:rgba(248,113,113,.2);
+--purple:#A78BFA;--purple-bg:rgba(167,139,250,.08);--purple-border:rgba(167,139,250,.2);
+--amber:#FBBF24;--amber-bg:rgba(251,191,36,.08);--amber-border:rgba(251,191,36,.2);
+--cyan:#22D3EE;--cyan-bg:rgba(34,211,238,.08);--cyan-border:rgba(34,211,238,.2);
+--r:14px;--rs:10px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'IBM Plex Sans',-apple-system,sans-serif;background:var(--ink);color:var(--text-primary);line-height:1.65;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer;font-family:inherit}
+
+/* ═══ NAV ═══ */
+.topnav{position:sticky;top:0;z-index:100;padding:0 24px;height:52px;display:flex;align-items:center;gap:16px;background:rgba(10,14,23,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border-dark);overflow-x:auto}
+.nav-btn{font-size:12px;font-weight:500;color:var(--text-muted);padding:6px 12px;border-radius:8px;border:none;background:none;white-space:nowrap;transition:all .2s}
+.nav-btn:hover{color:var(--text-secondary);background:rgba(255,255,255,.04)}
+.nav-btn.active{color:var(--accent);background:var(--accent-glow)}
+
+/* ═══ HERO ═══ */
+.hero{padding:48px 24px 36px;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(232,168,62,.05) 0%,transparent 70%);pointer-events:none}
+.hero-tag{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.hero h1{font-family:'Fraunces',Georgia,serif;font-size:clamp(28px,5vw,48px);font-weight:800;line-height:1.1;letter-spacing:-.03em;margin-bottom:12px}
+.hero h1 em{color:var(--accent);font-style:normal}
+.hero-sub{font-size:14px;color:var(--text-secondary);max-width:520px;margin:0 auto;font-weight:300}
+
+/* ═══ SECTIONS ═══ */
+.section{padding:40px 24px;max-width:1100px;margin:0 auto}
+.section-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border-dark),transparent)}
+.stag{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.sh{font-family:'Fraunces',Georgia,serif;font-size:clamp(22px,3.5vw,32px);font-weight:700;letter-spacing:-.02em;margin-bottom:6px}
+.sp{font-size:13px;color:var(--text-secondary);max-width:560px;margin-bottom:24px;line-height:1.6}
+
+/* ═══ PHASE TABS ═══ */
+.phase-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px}
+.phase-tab{font-size:11px;font-weight:600;padding:6px 14px;border-radius:8px;border:1px solid var(--border-dark);background:none;color:var(--text-muted);transition:all .25s}
+.phase-tab:hover{color:var(--text-secondary);border-color:var(--text-muted)}
+.phase-tab.active{border-color:var(--accent);color:var(--accent);background:var(--accent-glow)}
+.phase-content{display:none}
+.phase-content.active{display:block;animation:fadeSlide .35s ease}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ CARDS ═══ */
+.card{background:var(--ink-card);border:1px solid var(--border-dark);border-radius:var(--r);padding:20px;margin-bottom:12px;transition:border-color .3s}
+.card:hover{border-color:rgba(255,255,255,.08)}
+.card-h{font-family:'Fraunces',Georgia,serif;font-size:16px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.card-p{font-size:13px;color:var(--text-secondary);line-height:1.6}
+.card-tag{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;letter-spacing:.05em;padding:2px 8px;border-radius:5px;display:inline-block;margin-top:8px}
+
+/* ═══ FLOW DIAGRAM ═══ */
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}
+.flow-node{background:var(--ink-elevated);border:1px solid var(--border-dark);border-radius:var(--rs);padding:10px 14px;font-size:12px;font-weight:500;text-align:center;min-width:100px;position:relative}
+.flow-arrow{color:var(--accent);font-size:16px;font-weight:700}
+.flow-node.highlight{border-color:var(--accent);background:var(--accent-glow)}
+.flow-node.security{border-color:var(--green-border);background:var(--green-bg)}
+
+/* ═══ TWO-COL GRID ═══ */
+.grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+
+/* ═══ CALLOUT ═══ */
+.callout{border-left:3px solid var(--accent);background:var(--accent-glow);padding:14px 18px;border-radius:0 var(--rs) var(--rs) 0;margin:16px 0;font-size:13px;color:var(--text-secondary);line-height:1.6}
+.callout strong{color:var(--accent)}
+.callout.blue{border-color:var(--blue);background:var(--blue-bg)}
+.callout.blue strong{color:var(--blue)}
+.callout.green{border-color:var(--green);background:var(--green-bg)}
+.callout.green strong{color:var(--green)}
+.callout.red{border-color:var(--red);background:var(--red-bg)}
+.callout.red strong{color:var(--red)}
+.callout.purple{border-color:var(--purple);background:var(--purple-bg)}
+.callout.purple strong{color:var(--purple)}
+
+/* ═══ TABLE ═══ */
+.tbl{width:100%;border-collapse:collapse;margin:16px 0;font-size:12px}
+.tbl th{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);text-align:left;padding:8px 12px;border-bottom:2px solid var(--border-dark)}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);vertical-align:top}
+.tbl td:first-child{color:var(--text-primary);font-weight:500}
+.tbl tr:hover td{background:rgba(255,255,255,.015)}
+
+/* ═══ SECURITY SECTION ═══ */
+.key-visual{display:flex;align-items:center;gap:16px;padding:20px;background:linear-gradient(135deg,rgba(52,211,153,.04),rgba(52,211,153,.01));border:1px solid var(--green-border);border-radius:var(--r);margin:16px 0}
+.key-icon{font-size:40px;flex-shrink:0}
+.key-content h3{font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:700;color:var(--green);margin-bottom:4px}
+.key-content p{font-size:12px;color:var(--text-secondary);line-height:1.55}
+.permission-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:16px 0}
+.perm-card{padding:14px;border-radius:var(--rs);border:1px solid;font-size:12px}
+.perm-card h4{font-size:13px;font-weight:700;margin-bottom:4px}
+.perm-card p{color:var(--text-secondary);line-height:1.5}
+.perm-card.owner{border-color:var(--green-border);background:var(--green-bg)}
+.perm-card.owner h4{color:var(--green)}
+.perm-card.manager{border-color:var(--blue-border);background:var(--blue-bg)}
+.perm-card.manager h4{color:var(--blue)}
+.perm-card.staff{border-color:var(--purple-border);background:var(--purple-bg)}
+.perm-card.staff h4{color:var(--purple)}
+.perm-card.readonly{border-color:var(--border-dark);background:rgba(255,255,255,.02)}
+.perm-card.readonly h4{color:var(--text-secondary)}
+
+/* ═══ ARCHITECTURE DIAGRAM ═══ */
+.arch{margin:20px 0}
+.arch-layer{padding:16px;margin-bottom:8px;border-radius:var(--r);border:1px solid}
+.arch-layer h4{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.arch-layer .items{display:flex;flex-wrap:wrap;gap:6px}
+.arch-item{font-size:11px;padding:4px 10px;border-radius:6px;font-weight:500}
+.arch-layer.presentation{border-color:var(--blue-border);background:var(--blue-bg)}
+.arch-layer.presentation h4{color:var(--blue)}
+.arch-layer.presentation .arch-item{background:rgba(96,165,250,.12);color:var(--blue)}
+.arch-layer.logic{border-color:var(--accent);background:var(--accent-glow)}
+.arch-layer.logic h4{color:var(--accent)}
+.arch-layer.logic .arch-item{background:rgba(232,168,62,.12);color:var(--accent)}
+.arch-layer.data{border-color:var(--green-border);background:var(--green-bg)}
+.arch-layer.data h4{color:var(--green)}
+.arch-layer.data .arch-item{background:rgba(52,211,153,.12);color:var(--green)}
+.arch-layer.security{border-color:var(--red-border);background:var(--red-bg)}
+.arch-layer.security h4{color:var(--red)}
+.arch-layer.security .arch-item{background:rgba(248,113,113,.12);color:var(--red)}
+
+/* ═══ TIMELINE ═══ */
+.timeline{position:relative;padding-left:28px;margin:16px 0}
+.timeline::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:linear-gradient(to bottom,var(--accent),var(--border-dark))}
+.tl-item{position:relative;margin-bottom:20px}
+.tl-item::before{content:'';position:absolute;left:-23px;top:5px;width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);background:var(--ink)}
+.tl-item.done::before{background:var(--accent);box-shadow:0 0 6px rgba(232,168,62,.3)}
+.tl-item.active::before{background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,168,62,.3)}50%{box-shadow:0 0 0 5px rgba(232,168,62,0)}}
+.tl-phase{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--accent);letter-spacing:.08em;text-transform:uppercase}
+.tl-title{font-family:'Fraunces',Georgia,serif;font-size:15px;font-weight:700;margin:2px 0}
+.tl-desc{font-size:12px;color:var(--text-secondary);line-height:1.55}
+
+/* ═══ EXPANDABLE ═══ */
+.expand{border:1px solid var(--border-dark);border-radius:var(--rs);margin-bottom:8px;overflow:hidden}
+.expand-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;transition:background .2s}
+.expand-header:hover{background:rgba(255,255,255,.02)}
+.expand-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.expand-arrow{font-size:12px;color:var(--text-muted);transition:transform .3s}
+.expand.open .expand-arrow{transform:rotate(90deg)}
+.expand-body{display:none;padding:0 16px 14px;font-size:12px;color:var(--text-secondary);line-height:1.6}
+.expand.open .expand-body{display:block;animation:fadeSlide .3s ease}
+
+/* ═══ FOOTER ═══ */
+.footer{padding:32px 24px;border-top:1px solid var(--border-dark);text-align:center;font-size:11px;color:var(--text-muted)}
+.footer strong{color:var(--text-secondary)}
+
+@media(max-width:600px){
+.grid-2{grid-template-columns:1fr}
+.flow{flex-direction:column}
+.flow-arrow{transform:rotate(90deg)}
+.permission-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav class="topnav" id="topnav"></nav>
+
+<section class="hero">
+<div class="hero-tag">Development Blueprint</div>
+<h1>Clinic Operating System<br><em>MVP → Production</em></h1>
+<p class="hero-sub">The complete development roadmap from Notion prototype to production platform — including the Owner Key security model, SOP engine, and AI layer.</p>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════ -->
+<!-- SECTION 1: MVP OVERVIEW -->
+<!-- ═══════════════════════════════ -->
+<section class="section" id="s-mvp">
+<div class="stag">Phase 1 — The MVP</div>
+<div class="sh">Start With What Exists</div>
+<div class="sp">The MVP is not a custom-built app. It's a carefully structured Notion workspace + Claude AI layer that proves the concept with real clinics before a single line of production code is written.</div>
+
+<div class="callout"><strong>The Restaurant Analogy:</strong> Before you build a full commercial kitchen, you test the recipes in your home kitchen. The ingredients are the same. The recipes are the same. The only thing that changes when you go commercial is the scale and the equipment. Notion is the home kitchen.</div>
+
+<div class="card">
+<div class="card-h">🧠 Why Notion First?</div>
+<div class="card-p">Notion gives you 80% of what the MVP needs without writing code: databases, templates, permissions, API access, and a UI your test clinics already know how to use. The 20% it doesn't give you (AI layer, Owner Key, turnover assessment) gets layered on top. You'll outgrow Notion — that's the plan. But you'll outgrow it with real data about what matters and what doesn't.</div>
+</div>
+
+<div class="sh" style="font-size:20px;margin-top:24px">MVP Architecture</div>
+
+<div class="arch">
+<div class="arch-layer presentation">
+<h4>User Interface Layer — Notion Workspace</h4>
+<div class="items">
+<span class="arch-item">SOP Database</span>
+<span class="arch-item">Role Blueprints</span>
+<span class="arch-item">Meeting Notes</span>
+<span class="arch-item">Decision Log</span>
+<span class="arch-item">Vendor Directory</span>
+<span class="arch-item">Policy Library</span>
+<span class="arch-item">Brainstorm Sessions</span>
+<span class="arch-item">Training Sequences</span>
+</div>
+</div>
+<div class="arch-layer logic">
+<h4>Intelligence Layer — Claude AI (via API or MCP)</h4>
+<div class="items">
+<span class="arch-item">Natural Language Q&A</span>
+<span class="arch-item">SOP Drafting Assistant</span>
+<span class="arch-item">Turnover Gap Analysis</span>
+<span class="arch-item">Meeting → SOP Converter</span>
+<span class="arch-item">Onboarding Guide Generator</span>
+<span class="arch-item">Knowledge Search</span>
+</div>
+</div>
+<div class="arch-layer data">
+<h4>Data Layer — Notion API + Knowledge Index</h4>
+<div class="items">
+<span class="arch-item">Notion Databases</span>
+<span class="arch-item">Vector Embeddings (RAG)</span>
+<span class="arch-item">Version History</span>
+<span class="arch-item">Audit Trail</span>
+<span class="arch-item">Role-Tag Index</span>
+</div>
+</div>
+<div class="arch-layer security">
+<h4>Security Layer — Owner Key + Access Controls</h4>
+<div class="items">
+<span class="arch-item">Owner Key Gate</span>
+<span class="arch-item">Publish Lock</span>
+<span class="arch-item">Role-Based Permissions</span>
+<span class="arch-item">Change Request Queue</span>
+<span class="arch-item">Audit Log</span>
+<span class="arch-item">HIPAA Encryption</span>
+</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════ -->
+<!-- SECTION 2: SOP ENGINE -->
+<!-- ═══════════════════════════════ -->
+<section class="section" id="s-sop">
+<div class="stag">Core Module</div>
+<div class="sh">The SOP Engine</div>
+<div class="sp">The beating heart of the system. Every process, policy, and procedure lives here — not as a static document, but as a structured, versioned, role-tagged, AI-queryable piece of institutional knowledge.</div>
+
+<div class="sh" style="font-size:18px;margin-top:16px">SOP Lifecycle</div>
+
+<div class="flow">
+<div class="flow-node">💡 Brainstorm<br><small style="color:var(--text-muted)">Team session</small></div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">✍️ Draft<br><small style="color:var(--text-muted)">AI-assisted</small></div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">👀 Review<br><small style="color:var(--text-muted)">Team feedback</small></div>
+<div class="flow-arrow">→</div>
+<div class="flow-node highlight">🔑 Publish<br><small style="color:var(--text-muted)">Owner Key req.</small></div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">📚 Live SOP<br><small style="color:var(--text-muted)">Searchable</small></div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">🔄 Revision<br><small style="color:var(--text-muted)">Key to modify</small></div>
+</div>
+
+<div class="grid-2">
+<div class="card">
+<div class="card-h">📋 SOP Structure (Notion Database)</div>
+<div class="card-p">Each SOP is a Notion database entry with structured fields, not a free-form page. This is what makes it AI-queryable.</div>
+<table class="tbl">
+<tr><th>Field</th><th>Type</th><th>Purpose</th></tr>
+<tr><td>Title</td><td>Text</td><td>Clear, searchable name</td></tr>
+<tr><td>Category</td><td>Select</td><td>Clinical, Admin, Billing, HR, Compliance, Equipment, Marketing, IT</td></tr>
+<tr><td>Roles</td><td>Multi-select</td><td>Which roles need this SOP</td></tr>
+<tr><td>Status</td><td>Select</td><td>Draft → In Review → Published → Archived</td></tr>
+<tr><td>Steps</td><td>Rich text</td><td>The actual procedure (numbered, clear)</td></tr>
+<tr><td>Owner</td><td>Person</td><td>Who's responsible for keeping it current</td></tr>
+<tr><td>Created By</td><td>Person</td><td>Original author (preserved even after they leave)</td></tr>
+<tr><td>Version</td><td>Number</td><td>Increments on each published revision</td></tr>
+<tr><td>Last Reviewed</td><td>Date</td><td>Triggers stale-check alerts after 90 days</td></tr>
+<tr><td>Source</td><td>Select</td><td>Meeting, Brainstorm, Import, Manual, AI-Generated</td></tr>
+<tr><td>Publish Lock</td><td>Checkbox</td><td>🔒 Only toggled by Owner Key</td></tr>
+</table>
+</div>
+<div class="card">
+<div class="card-h">🤖 AI-Assisted SOP Creation</div>
+<div class="card-p">The AI doesn't replace humans — it eliminates the blank page. Here's the workflow:</div>
+<div class="callout blue" style="margin-top:10px"><strong>Step 1:</strong> Team has a meeting or brainstorm about a process (e.g., "How do we handle new patient intake?"). Notes are captured in the app.</div>
+<div class="callout blue"><strong>Step 2:</strong> The AI reads the meeting notes and drafts a structured SOP — numbered steps, role assignments, decision points, exceptions.</div>
+<div class="callout blue"><strong>Step 3:</strong> Team reviews and refines. They add the tribal knowledge ("always check for secondary insurance before calling the patient").</div>
+<div class="callout blue"><strong>Step 4:</strong> Manager submits for publication. Owner gets a notification. Owner reviews, uses their key to publish. It's now live and locked.</div>
+<div class="callout green"><strong>The magic:</strong> Documentation happens as a byproduct of meetings the team was already having. The AI converts conversation into procedure. Nobody has to sit down and "write documentation" as a separate task.</div>
+</div>
+</div>
+
+<div class="sh" style="font-size:18px;margin-top:16px">MVP Implementation in Notion</div>
+
+<div id="sopExpandables"></div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════ -->
+<!-- SECTION 3: AI LAYER -->
+<!-- ═══════════════════════════════ -->
+<section class="section" id="s-ai">
+<div class="stag">Intelligence Layer</div>
+<div class="sh">The AI Brain</div>
+<div class="sp">An AI that answers from your clinic's own knowledge — not from the internet, not from generic training data. Every answer cites its source. Every answer is grounded in what your team has documented.</div>
+
+<div class="callout purple"><strong>Think of it like this:</strong> ChatGPT is an encyclopedia — it knows a little about everything. This AI is your clinic's longest-tenured employee — it knows everything about how YOUR clinic runs, because it's read every SOP, every policy, every meeting note, and every decision you've ever documented.</div>
+
+<div class="sh" style="font-size:18px;margin-top:20px">How RAG Works (Plain English)</div>
+
+<div class="flow">
+<div class="flow-node">🗣️ Staff asks<br>a question</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">🔍 System searches<br>knowledge base</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">📄 Finds relevant<br>SOPs & notes</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node highlight">🤖 Claude reads<br>those documents</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node security">✅ Answers with<br>citations</div>
+</div>
+
+<div class="callout"><strong>RAG = Retrieval-Augmented Generation.</strong> Instead of the AI making things up, it first retrieves the actual documents from your knowledge base, then generates an answer based only on what it found. If the answer isn't in your knowledge base, it says "I don't have documentation on that" — which itself is valuable information (it tells you there's a knowledge gap).</div>
+
+<div class="grid-2">
+<div class="card">
+<div class="card-h">💬 Example Queries the AI Can Handle</div>
+<div class="card-p" style="line-height:2.2">
+<span class="card-tag" style="background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-border)">Admin</span> "What's our process for verifying insurance on new patients?"<br>
+<span class="card-tag" style="background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)">Clinical</span> "How do we handle a patient requesting discharge against medical advice?"<br>
+<span class="card-tag" style="background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border)">Billing</span> "What's the deadline for submitting claims to Aetna?"<br>
+<span class="card-tag" style="background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border)">HR</span> "What's our PTO policy for part-time staff?"<br>
+<span class="card-tag" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red-border)">Compliance</span> "Who needs to sign the BAA when we add a new software vendor?"<br>
+<span class="card-tag" style="background:var(--cyan-bg);color:var(--cyan);border:1px solid var(--cyan-border)">Operations</span> "When did we decide to switch from 45-minute to 60-minute eval slots, and why?"
+</div>
+</div>
+<div class="card">
+<div class="card-h">🏗️ MVP AI Implementation</div>
+<div class="card-p">For the MVP, the AI layer uses Claude's API with Notion as the knowledge source. Two approaches, both viable:</div>
+<table class="tbl">
+<tr><th>Approach</th><th>How It Works</th><th>Best For</th></tr>
+<tr><td>Claude Project</td><td>Export Notion KB as docs, upload to Claude Project. Staff asks questions in Claude with full context.</td><td>Fastest setup. Works today.</td></tr>
+<tr><td>Notion + Claude API</td><td>Build a simple interface that queries Notion API, retrieves relevant pages, sends to Claude with the question. Returns answer with citation links.</td><td>Better UX. Requires dev work.</td></tr>
+<tr><td>MCP Integration</td><td>Use Model Context Protocol to give Claude direct access to the Notion workspace. Real-time, no exports needed.</td><td>Most seamless. Emerging tech.</td></tr>
+</table>
+<div class="callout green" style="margin-top:10px"><strong>Start with Option 1.</strong> It takes 30 minutes to set up, costs $20/month for Claude Pro, and immediately proves whether staff will actually use it. If they do, invest in Option 2 or 3.</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════ -->
+<!-- SECTION 4: OWNER KEY -->
+<!-- ═══════════════════════════════ -->
+<section class="section" id="s-security">
+<div class="stag">Security Architecture</div>
+<div class="sh">The Owner Key System</div>
+<div class="sp">A published SOP is a promise. It can't be quietly changed by anyone — not a disgruntled employee, not an overeager manager, not even the AI. Only the Owner Key unlocks modifications.</div>
+
+<div class="key-visual">
+<div class="key-icon">🔐</div>
+<div class="key-content">
+<h3>The Owner Key Concept</h3>
+<p>Think of it like the master key to a safe deposit box at a bank. The bank employees can see the boxes exist. They can even describe what's inside. But only the key holder can open, add, remove, or change the contents. In this system, published SOPs are the safe deposit boxes. The Owner Key is the only way to modify them.</p>
+</div>
+</div>
+
+<div class="sh" style="font-size:18px;margin-top:20px">Permission Model</div>
+
+<div class="permission-grid">
+<div class="perm-card owner">
+<h4>🔑 Owner (Key Holder)</h4>
+<p>Publish SOPs, modify published content, approve changes, delegate temporary keys, view full audit trail, configure security settings, delete content permanently.</p>
+</div>
+<div class="perm-card manager">
+<h4>📋 Manager</h4>
+<p>Create drafts, submit for publication, request modifications to published SOPs (goes to approval queue), run turnover assessments, view team SOPs, create brainstorm sessions.</p>
+</div>
+<div class="perm-card staff">
+<h4>👤 Staff</h4>
+<p>View published SOPs for their role, ask AI questions, suggest edits (routed to manager), mark SOPs as "needs update" with reason, add comments and context.</p>
+</div>
+<div class="perm-card readonly">
+<h4>👁️ Read-Only / New Hire</h4>
+<p>View published SOPs for their role only, complete onboarding checklists, ask AI questions, cannot suggest edits until training period complete.</p>
+</div>
+</div>
+
+<div class="sh" style="font-size:18px;margin-top:20px">Modification Workflow</div>
+
+<div class="flow">
+<div class="flow-node">📝 Change<br>Requested</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">📬 Enters<br>Approval Queue</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">👁️ Owner<br>Reviews Diff</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node highlight">🔑 Owner Key<br>Applied</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node security">✅ New Version<br>Published</div>
+</div>
+
+<div class="callout green"><strong>What the audit trail captures:</strong> WHO requested the change, WHAT changed (exact diff), WHEN it was approved, WHO approved it (which key), and WHY (required reason field). Every version is preserved. Nothing is ever truly deleted — old versions are archived, not overwritten.</div>
+
+<div class="grid-2">
+<div class="card">
+<div class="card-h">🔑 MVP: Owner Key in Notion</div>
+<div class="card-p">In the Notion MVP, the Owner Key is implemented through Notion's permission system enhanced with workflow automation:</div>
+<table class="tbl">
+<tr><th>Mechanism</th><th>How</th></tr>
+<tr><td>Publish Lock</td><td>A checkbox property only the Owner can toggle (Notion page-level locks)</td></tr>
+<tr><td>Approval Queue</td><td>A separate database where change requests live until Owner reviews</td></tr>
+<tr><td>Version History</td><td>Notion's built-in page history + a manual Version # property</td></tr>
+<tr><td>Audit Trail</td><td>A linked database that auto-logs every status change with timestamp and user</td></tr>
+<tr><td>Role Permissions</td><td>Notion teamspace permissions: Owner = full, Manager = edit drafts, Staff = comment only on published</td></tr>
+</table>
+</div>
+<div class="card">
+<div class="card-h">🔐 Production: Cryptographic Owner Key</div>
+<div class="card-p">When the product moves to production, the Owner Key becomes a real cryptographic system:</div>
+<table class="tbl">
+<tr><th>Feature</th><th>Implementation</th></tr>
+<tr><td>Key Generation</td><td>Unique cryptographic key generated at account creation, stored in hardware security module (HSM)</td></tr>
+<tr><td>Two-Factor Publish</td><td>Owner Key + biometric or authenticator app to publish/modify</td></tr>
+<tr><td>Delegation Tokens</td><td>Owner can create time-limited, scope-limited tokens for managers (e.g., "edit billing SOPs for 24 hours")</td></tr>
+<tr><td>Tamper Evidence</td><td>Blockchain-style hash chain — every published SOP's hash depends on the previous one. Any tampering breaks the chain.</td></tr>
+<tr><td>Emergency Access</td><td>Break-glass protocol: if Owner is unavailable, a pre-configured recovery process (not a backdoor) allows access with full audit logging</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════ -->
+<!-- SECTION 5: TURNOVER SHIELD -->
+<!-- ═══════════════════════════════ -->
+<section class="section" id="s-turnover">
+<div class="stag">Protection Layer</div>
+<div class="sh">The Turnover Shield</div>
+<div class="sp">When someone gives notice, the system doesn't just say goodbye — it protects the knowledge that's about to walk out the door.</div>
+
+<div class="sh" style="font-size:18px;margin-top:16px">Turnover Shield Process</div>
+
+<div class="flow">
+<div class="flow-node" style="border-color:var(--red-border);background:var(--red-bg)">🚨 Departure<br>Flagged</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">📊 Role<br>Assessment</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">⚠️ Gap<br>Analysis</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node highlight">📝 Exit Interview<br>Template</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node">🗣️ Knowledge<br>Extraction</div>
+<div class="flow-arrow">→</div>
+<div class="flow-node security">📚 SOPs Created<br>& Published</div>
+</div>
+
+<div class="grid-2">
+<div class="card">
+<div class="card-h">📊 What the Assessment Does</div>
+<div class="card-p">When a departure is flagged, the AI cross-references the person's role against the knowledge base:</div>
+<table class="tbl">
+<tr><th>Check</th><th>What It Looks For</th></tr>
+<tr><td>SOP Coverage</td><td>How many of the role's processes have documented SOPs?</td></tr>
+<tr><td>Sole Ownership</td><td>Which SOPs were created only by this person (no co-authors)?</td></tr>
+<tr><td>Stale Content</td><td>Which SOPs were last updated >6 months ago and may be outdated?</td></tr>
+<tr><td>Undocumented Knowledge</td><td>What processes does this role handle that have NO SOP at all?</td></tr>
+<tr><td>Tribal Knowledge Signals</td><td>Meeting notes where this person was the primary responder on questions</td></tr>
+</table>
+</div>
+<div class="card">
+<div class="card-h">📝 Exit Interview Generator</div>
+<div class="card-p">The AI generates a structured interview template specific to the departing employee:</div>
+<div class="callout" style="margin-top:10px"><strong>Example output for Sarah (Insurance Verification Specialist, 4 years):</strong><br><br>
+"9 processes tied to Sarah's role have no documented SOP. The following questions are designed to extract this knowledge before her last day:<br><br>
+1. Pre-authorization: Walk me through how you determine which payers need pre-auth. Are there exceptions?<br>
+2. Aetna secret line: You mentioned a direct number that bypasses the automated system. What is it and when should we use it?<br>
+3. Denial appeals: What's your step-by-step process when a claim is denied? Any payer-specific tricks?<br>
+..."</div>
+</div>
+</div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════ -->
+<!-- SECTION 6: DEVELOPMENT PHASES -->
+<!-- ═══════════════════════════════ -->
+<section class="section" id="s-phases">
+<div class="stag">Development Roadmap</div>
+<div class="sh">From MVP to Platform</div>
+<div class="sp">Four phases, each one proving the next is worth building. No phase starts until the previous one has real-world validation.</div>
+
+<div class="phase-tabs" id="phaseTabs"></div>
+<div id="phaseContent"></div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════ -->
+<!-- SECTION 7: NOTION SETUP -->
+<!-- ═══════════════════════════════ -->
+<section class="section" id="s-notion">
+<div class="stag">Practical Setup</div>
+<div class="sh">Notion Workspace Blueprint</div>
+<div class="sp">The exact databases, templates, and structure you'd set up in Notion to start the MVP this week.</div>
+
+<div id="notionDatabases"></div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ═══════════════════════════════ -->
+<!-- SECTION 8: LONG TERM -->
+<!-- ═══════════════════════════════ -->
+<section class="section" id="s-longterm">
+<div class="stag">The Vision</div>
+<div class="sh">Production Platform Architecture</div>
+<div class="sp">What the product looks like when it outgrows Notion — the custom-built platform that becomes the subscription product.</div>
+
+<div class="arch">
+<div class="arch-layer presentation">
+<h4>Frontend — Custom Web + Mobile App</h4>
+<div class="items">
+<span class="arch-item">Dashboard</span>
+<span class="arch-item">SOP Editor</span>
+<span class="arch-item">AI Chat</span>
+<span class="arch-item">Brainstorm Rooms</span>
+<span class="arch-item">Role Manager</span>
+<span class="arch-item">Onboarding Wizard</span>
+<span class="arch-item">Search & Discover</span>
+<span class="arch-item">Mobile Companion</span>
+</div>
+</div>
+<div class="arch-layer logic">
+<h4>Backend — API + AI Engine</h4>
+<div class="items">
+<span class="arch-item">Claude API (RAG)</span>
+<span class="arch-item">SOP Versioning Engine</span>
+<span class="arch-item">Turnover Shield</span>
+<span class="arch-item">Notification System</span>
+<span class="arch-item">Subscription Billing</span>
+<span class="arch-item">Owner Key Crypto</span>
+<span class="arch-item">MCP Connectors</span>
+<span class="arch-item">Analytics Engine</span>
+</div>
+</div>
+<div class="arch-layer data">
+<h4>Data Layer — Encrypted, HIPAA-Compliant</h4>
+<div class="items">
+<span class="arch-item">PostgreSQL (structured)</span>
+<span class="arch-item">Vector DB (embeddings)</span>
+<span class="arch-item">S3 (documents)</span>
+<span class="arch-item">Hash Chain (audit)</span>
+<span class="arch-item">Redis (sessions)</span>
+<span class="arch-item">Backups (encrypted)</span>
+</div>
+</div>
+<div class="arch-layer security">
+<h4>Security — Zero Trust Architecture</h4>
+<div class="items">
+<span class="arch-item">HSM Key Storage</span>
+<span class="arch-item">AES-256 Encryption</span>
+<span class="arch-item">MFA Required</span>
+<span class="arch-item">SOC 2 Compliance</span>
+<span class="arch-item">HIPAA BAA Ready</span>
+<span class="arch-item">Penetration Testing</span>
+<span class="arch-item">Audit Immutability</span>
+<span class="arch-item">Break-Glass Protocol</span>
+</div>
+</div>
+</div>
+
+<div class="callout red" style="margin-top:16px"><strong>Don't build this yet.</strong> This architecture is the destination, not the starting point. Every component here exists because the Notion MVP proved it was needed. Building production infrastructure before proving demand is the most expensive mistake startups make.</div>
+
+<div class="grid-2" style="margin-top:16px">
+<div class="card">
+<div class="card-h">🔗 Integration Points (Future)</div>
+<table class="tbl">
+<tr><th>System</th><th>Integration</th></tr>
+<tr><td>EMR (Jane, Prompt, etc.)</td><td>Pull patient volume data for workload SOPs</td></tr>
+<tr><td>Scheduling</td><td>Auto-assign onboarding tasks for new hires</td></tr>
+<tr><td>Billing</td><td>Trigger SOP reviews when payer policies change</td></tr>
+<tr><td>Communication (Slack, Teams)</td><td>AI answers SOP questions in team channels</td></tr>
+<tr><td>AI Scribe</td><td>Scribe summaries feed clinical knowledge base</td></tr>
+<tr><td>HR/Payroll</td><td>Departure events auto-trigger Turnover Shield</td></tr>
+</table>
+</div>
+<div class="card">
+<div class="card-h">📈 Metrics That Prove It's Working</div>
+<table class="tbl">
+<tr><th>Metric</th><th>Target</th></tr>
+<tr><td>SOP coverage rate</td><td>80%+ of role processes documented</td></tr>
+<tr><td>AI query volume</td><td>Staff using it 5+ times/week</td></tr>
+<tr><td>Onboarding time</td><td>50% reduction vs. pre-system</td></tr>
+<tr><td>Knowledge gap score</td><td>Turnover Shield surfaces <5 gaps per departure</td></tr>
+<tr><td>SOP freshness</td><td>90%+ reviewed within last 90 days</td></tr>
+<tr><td>Staff satisfaction</td><td>NPS >60 from team members</td></tr>
+</table>
+</div>
+</div>
+</section>
+
+<footer class="footer">
+<strong>Clinic Operating System — MVP Development Blueprint</strong><br>
+Larry Meyer & Josh Gray · BUILD Biomechanics Institute · February 2026<br>
+This is a living document. The concepts here are the starting point, not the final answer.
+</footer>
+
+<script>
+// ═══ NAV ═══
+const SECTIONS = [
+  { id: 's-mvp', label: 'MVP Overview' },
+  { id: 's-sop', label: 'SOP Engine' },
+  { id: 's-ai', label: 'AI Layer' },
+  { id: 's-security', label: 'Owner Key' },
+  { id: 's-turnover', label: 'Turnover Shield' },
+  { id: 's-phases', label: 'Dev Phases' },
+  { id: 's-notion', label: 'Notion Setup' },
+  { id: 's-longterm', label: 'Long Term' },
+];
+document.getElementById('topnav').innerHTML = SECTIONS.map(s =>
+  `<button class="nav-btn" onclick="document.getElementById('${s.id}').scrollIntoView({behavior:'smooth',block:'start'});document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active')">${s.label}</button>`
+).join('');
+
+// ═══ SOP EXPANDABLES ═══
+const SOP_EXPAND = [
+  { title: '📁 Notion Database: SOPs', body: 'Create a full-page database in Notion called "SOPs." Properties: Title (title), Category (select: Clinical, Admin, Billing, HR, Compliance, Equipment, Marketing, IT), Roles (multi-select: Front Desk, Billing Coordinator, PT, PTA, Office Manager, Clinic Owner), Status (select: Draft, In Review, Published, Archived), Version (number), Owner (person), Created By (person), Last Reviewed (date), Source (select: Meeting, Brainstorm, Manual, AI-Generated, Import), Publish Lock (checkbox — only Owner can toggle via Notion permissions), Steps (page content — the actual SOP body). Each SOP is a page inside this database.' },
+  { title: '📄 SOP Template', body: 'Create a Notion template for new SOPs that pre-fills: Status = "Draft", Version = 1, Source = "Manual", and includes a structured body template with sections: PURPOSE (one sentence), APPLIES TO (which roles), PREREQUISITES (what you need before starting), STEPS (numbered procedure), EXCEPTIONS (when this doesn\'t apply), RELATED SOPs (links), REVISION HISTORY (table: date, author, change). The template ensures every SOP follows the same structure — which is what makes the AI layer effective.' },
+  { title: '🔄 Status Automation', body: 'Use Notion\'s built-in automations (or Zapier/Make for the MVP) to: (1) When Status changes to "In Review," notify the Owner via email/Slack. (2) When Status changes to "Published," auto-set Last Reviewed to today. (3) When Last Reviewed is >90 days ago, change a "Freshness" formula property to show ⚠️. (4) When a published SOP\'s content is edited, auto-create an entry in the Audit Trail database with the editor\'s name, timestamp, and changed fields.' },
+  { title: '🗂️ Categories & Roles', body: 'The 8 SOP categories (Clinical, Admin, Billing, HR, Compliance, Equipment, Marketing, IT) come directly from the course\'s "8 types of institutional knowledge every clinic needs to capture." Roles should match the clinic\'s actual positions — start with the standard ones (Front Desk, Billing Coordinator, PT, PTA, Office Manager, Clinic Owner) and let each clinic customize. A role can have many SOPs, and an SOP can belong to many roles. This many-to-many relationship is what powers the Role Blueprint feature.' },
+  { title: '🔍 Views for Different Users', body: 'Create Notion database views for each use case: (1) "My SOPs" — filtered by current user\'s role, sorted by category. This is what staff see daily. (2) "Needs Review" — filtered by Last Reviewed >90 days. Owner\'s maintenance view. (3) "Drafts in Progress" — filtered by Status = Draft or In Review. Manager\'s pipeline. (4) "By Role" — grouped by Roles property. Used for onboarding — shows everything a new hire needs. (5) "Recently Published" — sorted by Last Reviewed descending. Team\'s "what\'s new" view. (6) "Approval Queue" — filtered by Status = In Review. Owner\'s action items.' },
+];
+document.getElementById('sopExpandables').innerHTML = SOP_EXPAND.map((e, i) =>
+  `<div class="expand" id="sop-exp-${i}"><div class="expand-header" onclick="this.parentElement.classList.toggle('open')"><div class="expand-title">${e.title}</div><div class="expand-arrow">▶</div></div><div class="expand-body">${e.body}</div></div>`
+).join('');
+
+// ═══ PHASE TABS ═══
+const PHASES = [
+  { id: 'p1', label: 'Phase 1: Notion MVP (Months 1-3)', color: 'var(--green)', content: `
+    <div class="callout green"><strong>Goal:</strong> Prove the concept with 3–5 friendly clinics. Does the SOP engine get used? Does the AI layer answer questions staff actually ask? Does the Owner Key workflow feel natural or annoying?</div>
+    <div class="timeline">
+      <div class="tl-item active"><div class="tl-phase">Week 1-2</div><div class="tl-title">Build the Notion Workspace</div><div class="tl-desc">Set up the SOP database, Role Blueprints database, Meeting Notes database, Decision Log, and Audit Trail. Create templates for each. Configure permissions (Owner = full access, Manager = edit, Staff = comment).</div></div>
+      <div class="tl-item"><div class="tl-phase">Week 2-3</div><div class="tl-title">Seed with Real Content</div><div class="tl-desc">Use Larry's clinic as the first test case. Document 10-15 real SOPs across at least 3 categories. Have staff actually use them and give feedback on the structure. This is the hardest part — the first content sets the standard for everything that follows.</div></div>
+      <div class="tl-item"><div class="tl-phase">Week 3-4</div><div class="tl-title">Connect the AI Layer</div><div class="tl-desc">Export the Notion knowledge base. Upload to a Claude Project. Test: can the AI accurately answer questions about YOUR clinic's processes? Iterate on the system prompt until answers are reliable and cite sources.</div></div>
+      <div class="tl-item"><div class="tl-phase">Month 2</div><div class="tl-title">Onboard Test Clinics</div><div class="tl-desc">Invite 3-5 course alumni to set up their own workspace (duplicate the template). Guide them through seeding their first 10 SOPs. This is where you learn: what's confusing? What's missing? What do they need that you didn't think of?</div></div>
+      <div class="tl-item"><div class="tl-phase">Month 3</div><div class="tl-title">Validate & Document</div><div class="tl-desc">Collect data: How many SOPs were created? How often is the AI queried? What questions can't it answer? Would they pay for this? What's the #1 thing they'd change? This data determines whether Phase 2 happens.</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-h">💰 MVP Cost</div><table class="tbl"><tr><td>Notion (Team Plan)</td><td>$10/user/month</td></tr><tr><td>Claude Pro</td><td>$20/month</td></tr><tr><td>Zapier (automations)</td><td>$20/month</td></tr><tr><td>Your time</td><td>The expensive part</td></tr><tr><td><strong>Total</strong></td><td><strong>~$70/month + time</strong></td></tr></table></div>
+      <div class="card"><div class="card-h">✅ Success Criteria</div><table class="tbl"><tr><td>SOPs created per clinic</td><td>15+ in first month</td></tr><tr><td>AI queries per week</td><td>10+ per clinic</td></tr><tr><td>Staff adoption</td><td>60%+ of team using it</td></tr><tr><td>Willingness to pay</td><td>3/5 clinics say yes</td></tr><tr><td>Retention</td><td>Still using at month 3</td></tr></table></div>
+    </div>
+  `},
+  { id: 'p2', label: 'Phase 2: Enhanced MVP (Months 3-6)', color: 'var(--blue)', content: `
+    <div class="callout blue"><strong>Goal:</strong> Add the features that the Notion MVP can't do well — real-time AI chat, automated turnover assessments, and a polished Owner Key workflow. Still built on Notion, but with custom integrations.</div>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-phase">Month 3-4</div><div class="tl-title">Build Custom AI Interface</div><div class="tl-desc">Create a simple web app (could be a Claude artifact or lightweight React app) that connects to Notion's API and Claude's API. Staff asks questions in a clean chat interface instead of switching to Claude separately. Every answer includes clickable links back to the source SOP in Notion.</div></div>
+      <div class="tl-item"><div class="tl-phase">Month 4</div><div class="tl-title">Implement Turnover Shield v1</div><div class="tl-desc">Build the automated role assessment: when a departure is flagged, the system cross-references the person's role tag against SOPs in the database. Output: a gap report + exit interview template. This can be a Claude-powered automation triggered by a Notion status change.</div></div>
+      <div class="tl-item"><div class="tl-phase">Month 4-5</div><div class="tl-title">Owner Key Workflow Automation</div><div class="tl-desc">Build proper approval queues: change requests land in a dedicated database, Owner gets notifications, approvals auto-update the SOP and audit trail. Notion buttons + automations handle most of this; custom code fills the gaps.</div></div>
+      <div class="tl-item"><div class="tl-phase">Month 5-6</div><div class="tl-title">Meeting → SOP Pipeline</div><div class="tl-desc">The magic feature: record a team meeting (or paste notes), the AI extracts actionable procedures, drafts SOPs, and queues them for review. This is the "documentation happens as a byproduct of work" promise made real.</div></div>
+      <div class="tl-item"><div class="tl-phase">Month 6</div><div class="tl-title">Pricing Validation</div><div class="tl-desc">Run a pilot subscription with test clinics. $99/month for the enhanced version. Track: do they pay? Do they keep paying? What feature would make them pay more? This is the revenue validation that funds Phase 3.</div></div>
+    </div>
+  `},
+  { id: 'p3', label: 'Phase 3: Custom Product (Months 6-12)', color: 'var(--purple)', content: `
+    <div class="callout purple"><strong>Goal:</strong> Build the standalone product that doesn't depend on Notion. Custom web app, proper database, production security, subscription billing. This is where it becomes a real SaaS product.</div>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-phase">Month 6-8</div><div class="tl-title">Core Platform Development</div><div class="tl-desc">Custom web application with: SOP editor (rich text, templates, versioning), Role management, Team workspace, AI chat with RAG, Owner Key with cryptographic signatures. Tech stack: Next.js or similar, PostgreSQL, vector database for embeddings, Claude API.</div></div>
+      <div class="tl-item"><div class="tl-phase">Month 8-9</div><div class="tl-title">Security Hardening</div><div class="tl-desc">Implement production Owner Key system with HSM key storage, implement hash chain for audit immutability, add MFA, encrypt all data at rest (AES-256), begin SOC 2 compliance preparation, conduct first penetration test.</div></div>
+      <div class="tl-item"><div class="tl-phase">Month 9-10</div><div class="tl-title">Migration & Beta</div><div class="tl-desc">Build Notion → Platform migration tool so existing users don't lose their data. Beta launch with existing customers. Parallel run: both systems active while users migrate. Fix everything that breaks.</div></div>
+      <div class="tl-item"><div class="tl-phase">Month 10-12</div><div class="tl-title">Launch & Scale</div><div class="tl-desc">Public launch. Subscription tiers active. Marketing through course alumni, newsletter, and word of mouth. Onboarding flow for new customers. Support infrastructure. First month target: 20 paying subscribers.</div></div>
+    </div>
+  `},
+  { id: 'p4', label: 'Phase 4: Platform (Year 2+)', color: 'var(--accent)', content: `
+    <div class="callout"><strong>Goal:</strong> Expand beyond PT. The operating system concept works for any small healthcare practice. Grow the feature set, the market, and the moat.</div>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-phase">Year 2 Q1</div><div class="tl-title">EMR & Scheduling Integrations</div><div class="tl-desc">Connect to Jane, Prompt, WebPT, and other PT EMRs. Auto-trigger SOP reviews when processes change. Import patient volume data for workload-aware SOPs.</div></div>
+      <div class="tl-item"><div class="tl-phase">Year 2 Q2</div><div class="tl-title">Mobile Companion App</div><div class="tl-desc">Staff can pull up SOPs and ask the AI questions from their phone on the clinic floor. Push notifications for stale SOPs and approval requests.</div></div>
+      <div class="tl-item"><div class="tl-phase">Year 2 Q3</div><div class="tl-title">Industry Expansion</div><div class="tl-desc">Adapt the platform for OT, speech therapy, chiropractic, and dental. The core engine is the same — only the SOP templates and role blueprints change. Each vertical multiplies the addressable market.</div></div>
+      <div class="tl-item"><div class="tl-phase">Year 2 Q4</div><div class="tl-title">Analytics & Insights</div><div class="tl-desc">Dashboard showing: SOP coverage by role, knowledge risk score, onboarding efficiency trends, most-queried topics (identifies training gaps), cross-clinic benchmarks for multi-location subscribers.</div></div>
+      <div class="tl-item"><div class="tl-phase">Year 3+</div><div class="tl-title">The Platform Play</div><div class="tl-desc">Open marketplace for SOP templates (clinics can share anonymized best practices). Industry benchmarking. Consulting marketplace where certified partners help clinics set up their systems. Conference presence. The goal: when any small healthcare practice thinks "operations," they think of this product.</div></div>
+    </div>
+  `},
+];
+
+document.getElementById('phaseTabs').innerHTML = PHASES.map((p, i) =>
+  `<button class="phase-tab${i === 0 ? ' active' : ''}" onclick="showPhase('${p.id}',this)" style="--pc:${p.color}">${p.label}</button>`
+).join('');
+document.getElementById('phaseContent').innerHTML = PHASES.map((p, i) =>
+  `<div class="phase-content${i === 0 ? ' active' : ''}" id="${p.id}">${p.content}</div>`
+).join('');
+
+function showPhase(id, el) {
+  document.querySelectorAll('.phase-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.phase-content').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(id).classList.add('active');
+}
+
+// ═══ NOTION DATABASES ═══
+const NOTION_DBS = [
+  { icon: '📋', name: 'SOPs', desc: 'The core database. Every procedure, policy, and process. Structured with 11 properties (see SOP Engine section). Templates for each SOP category.', status: 'Core' },
+  { icon: '👤', name: 'Role Blueprints', desc: 'One entry per role. Properties: Role Name, Department, Reports To, Responsibilities (rich text), Associated SOPs (relation to SOP database), Training Sequence (ordered checklist), Key Contacts, Escalation Path. This is what a new hire sees on day one.', status: 'Core' },
+  { icon: '📝', name: 'Meeting Notes', desc: 'Captured in real-time or after the fact. Properties: Date, Attendees, Topic, Notes (rich text), Action Items (checklist), SOPs Generated (relation). The AI reads these to draft SOPs.', status: 'Core' },
+  { icon: '⚖️', name: 'Decision Log', desc: 'Every significant business decision, recorded once and retrievable forever. Properties: Decision, Date, Made By, Rationale, Alternatives Considered, Related SOPs. When staff ask "why do we do it this way?" the AI pulls from here.', status: 'Core' },
+  { icon: '📬', name: 'Approval Queue', desc: 'Change requests waiting for Owner Key approval. Properties: Requested By, SOP (relation), Change Description, Priority, Status (Pending/Approved/Rejected), Owner Notes. The Owner reviews and approves from this single view.', status: 'Security' },
+  { icon: '📜', name: 'Audit Trail', desc: 'Auto-logged entries for every meaningful action. Properties: Timestamp, User, Action (Created/Modified/Published/Archived), Target SOP (relation), Details. Never edited, never deleted. Append-only.', status: 'Security' },
+  { icon: '🏢', name: 'Vendor Directory', desc: 'Every vendor, tool, and service the clinic uses. Properties: Name, Category, Contact, Login Info (secured), Contract Renewal Date, BAA Status, Monthly Cost, Notes. Eliminates "who do we call about X?"', status: 'Knowledge' },
+  { icon: '📖', name: 'Policy Library', desc: 'Higher-level policies that SOPs implement. Properties: Policy Name, Category, Effective Date, Review Cycle, Full Text. Links to related SOPs. Think of policies as the "why" and SOPs as the "how."', status: 'Knowledge' },
+];
+
+document.getElementById('notionDatabases').innerHTML = NOTION_DBS.map(db =>
+  `<div class="card"><div class="card-h">${db.icon} ${db.name} <span class="card-tag" style="background:${db.status === 'Core' ? 'var(--blue-bg)' : db.status === 'Security' ? 'var(--red-bg)' : 'var(--green-bg)'};color:${db.status === 'Core' ? 'var(--blue)' : db.status === 'Security' ? 'var(--red)' : 'var(--green)'};border:1px solid ${db.status === 'Core' ? 'var(--blue-border)' : db.status === 'Security' ? 'var(--red-border)' : 'var(--green-border)'};margin:0 0 0 8px">${db.status}</span></div><div class="card-p">${db.desc}</div></div>`
+).join('');
+
+// ═══ SCROLL SPY ═══
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.toggle('active', b.onclick.toString().includes(id));
+      });
+    }
+  });
+}, { threshold: 0.2, rootMargin: '-52px 0px -60% 0px' });
+SECTIONS.forEach(s => { const el = document.getElementById(s.id); if (el) observer.observe(el); });
+</script>
+</body>
+</html>
